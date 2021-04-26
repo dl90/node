@@ -5,12 +5,12 @@ const pad = num => (num > 9 ? '' : '0') + num
 const accessLog = (time, index) => {
   if (!time) return 'latest.access.log'
 
-  const month = time.getFullYear() + '-' + pad(time.getMonth() + 1)
+  const yearMonth = `${time.getFullYear()}-${pad(time.getMonth() + 1)}`
   const day = pad(time.getDate())
   const hour = pad(time.getHours())
   const minute = pad(time.getMinutes())
 
-  return `${month}/${month}-${day} ${hour}:${minute} ${index}-access.log`
+  return `${yearMonth}/${day} ${hour}:${minute} ${index}-access.log`
 }
 
 export const accessLogStream = rfs.createStream(accessLog, {
