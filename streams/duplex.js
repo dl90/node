@@ -2,6 +2,9 @@ const fs = require('fs')
 const stream = require('stream')
 const logUpdate = require('log-update')
 
+const { spin } = require('./util/spin.js')
+const { Collect } = require('./util/customStreams.js')
+
 const FILE_PATH = './resource/powder-day.mp4'
 const startTime = process.hrtime()
 const startUsage = process.cpuUsage()
@@ -10,20 +13,8 @@ const fileSize = fs.statSync(FILE_PATH).size
 
 /*
   duplex streams can be placed between readable and writable streams
+  but the read and write streams are independent
 */
-
-class Collect extends stream.Writable {
-  constructor (runningBuffer) {
-    super()
-    this.buffer = runningBuffer
-  }
-
-  _write (chunk, encoding, done) {
-    if (!chunk) this.end()
-    this.buffer.push(Buffer.from(chunk))
-    done()
-  }
-}
 
 class Throttle extends stream.Duplex {
   constructor (ms) {
@@ -50,7 +41,7 @@ const read = fs.createReadStream(FILE_PATH, { highWaterMark: 16 * 1024 })
 const passthrough = new stream.PassThrough()
 const throttle = new Throttle(3)
 const write = new Collect(runningBuffer)
-const progress = spin()
+const progress = spin(startTime, startUsage, startMemory, fileSize)
 
 /*
   chaining throttle reduces cpu usage
@@ -81,45 +72,3 @@ write
       file size on system: ${(fileSize / 1_000_000).toFixed(2)} MB
     `)
   })
-
-/*
-  populate some stats
-*/
-function spin () {
-  const spinner = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
-  let i = 0
-
-  function hrtimeToMS (hrtime) {
-    return hrtime[0] * 1000 + hrtime[1] / 1_000_000
-  }
-
-  return (read, passed, done = false) => {
-    const elapsedTime = hrtimeToMS(process.hrtime(startTime))
-    const elapsedUsage = process.cpuUsage(startUsage)
-    const elapsedRSSMemory = (process.memoryUsage().rss - startMemory) / 1_048_576 // MB
-
-    const elapsedUserMS = elapsedUsage.user / 1000
-    const elapsedSystMS = elapsedUsage.system / 1000;
-    const cpuPercent = (100 * (elapsedUserMS + elapsedSystMS) / elapsedTime).toFixed(1) + '%'
-
-    done
-      ? logUpdate(`
-        ⠿ read: ${read}
-          passed: ${passed}
-          diff: ${read - passed}
-          remaining: ${(passed / fileSize * 100).toFixed(3)}%
-          cpu usage: ~${cpuPercent}
-          rss memory: ${elapsedRSSMemory.toFixed(3)} MB
-          elapsed time: ${elapsedTime.toFixed(3)} ms
-      `)
-      : logUpdate(`
-        ${spinner[i = ++i % spinner.length]} read: ${read}
-          passed: ${passed}
-          diff: ${read - passed}
-          remaining: ${(passed / fileSize * 100).toFixed(3)}%
-          cpu usage: ~${cpuPercent}
-          rss memory: ${elapsedRSSMemory.toFixed(3)} MB
-          elapsed time: ${elapsedTime.toFixed(3)} ms
-      `)
-  }
-}

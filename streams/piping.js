@@ -5,7 +5,10 @@ const { pipeline: pipelinePromise } = require('stream/promises')
 const { promisify } = require('util')
 
 /*
-  pipe automatically handles back pressure
+  pipe automatically handles
+  - errors
+  - end-of-files
+  - back pressure
 */
 
 const pipe = promisify(pipeline)

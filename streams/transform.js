@@ -1,7 +1,9 @@
 const fs = require('fs')
 const stream = require('stream')
 const { createGunzip } = require('zlib')
-const logUpdate = require('log-update')
+
+const { spin } = require('./util/spin.js')
+const { Throttle, Collect } = require('./util/customStreams.js')
 
 const FILE_PATH = './resource/TinyButMighty.txt.gz'
 const startTime = process.hrtime()
@@ -9,40 +11,10 @@ const startUsage = process.cpuUsage()
 const startMemory = process.memoryUsage().rss
 const fileSize = fs.statSync(FILE_PATH).size
 
+
 /*
   transform stream = duplex stream that modifies chunks mid stream
 */
-
-class Collect extends stream.Writable {
-  constructor (runningBuffer) {
-    super()
-    this.buffer = runningBuffer
-  }
-
-  _write (chunk, encoding, done) {
-    if (!chunk) this.end()
-    this.buffer.push(Buffer.from(chunk))
-    done()
-  }
-}
-
-class Throttle extends stream.Duplex {
-  constructor (ms) {
-    super()
-    this.delay = ms
-  }
-
-  _read () { }
-
-  _write (chunk, encoding, done) {
-    this.push(chunk)
-    setTimeout(done, this.delay)
-  }
-
-  _final () {
-    this.push(null)
-  }
-}
 
 class FilterByMatch extends stream.Transform {
   constructor (match) {
@@ -50,6 +22,11 @@ class FilterByMatch extends stream.Transform {
     this.match = match
   }
 
+  /*
+    here read and write are combined with
+    - chunk representing data coming in
+    - this.push(buffer) representing data going out
+  */
   _transform (chunk, encoding, done) {
     const matches = chunk.toString().match(this.match)?.join(' ') ?? ''
     const buffer = new TextEncoder().encode(matches)
@@ -57,8 +34,12 @@ class FilterByMatch extends stream.Transform {
     done()
   }
 
+  /*
+    called when no more data is to be consumed, but before end event
+  */
   _flush (done) {
-    this.push(new TextEncoder().encode('---END---'))
+    // push buffer of text
+    // this.push(new TextEncoder().encode(' ---END---'))
     done()
   }
 }
@@ -71,13 +52,18 @@ const unzip = createGunzip()
 const throttle = new Throttle(2)
 const filter = new FilterByMatch(/secret([\w]?)+/g)
 const collect = new Collect(runningBuffer)
-const progress = spin()
+const progress = spin(startTime, startUsage, startMemory, fileSize)
 
-read
-  .pipe(unzip)
-  .pipe(throttle)
-  .pipe(filter)
-  .pipe(collect)
+try {
+  read
+    .pipe(unzip)
+    .pipe(throttle)
+    .pipe(filter)
+    .pipe(collect)
+} catch (error) {
+  console.log(error)
+  process.abort(123)
+}
 
 read
   .on('data', () => {
@@ -97,45 +83,17 @@ collect
     console.log(`
       parsed buffer size: ${buffer.length}
     `)
-    console.log(new Set(buffer.toString().split(' ')))
+
+    const deduped = new Set(buffer.toString().split(' '))
+    const str = Array.from(deduped).sort((a, b) => {
+      if (a.length !== b.length) return a.length - b.length
+      for (let i = 0; i < a.length; i++) {
+        if (a.charCodeAt(i) === b.charCodeAt(i)) continue
+        return a.charCodeAt[i] - b.charCodeAt[i]
+      }
+    }).join('\n')
+    const output = fs.createWriteStream('./resource/pw.txt')
+
+    // create readable stream
+    stream.Readable.from(str).pipe(output)
   })
-
-
-function spin () {
-  const spinner = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
-  let i = 0
-
-  function hrtimeToMS (hrtime) {
-    return hrtime[0] * 1000 + hrtime[1] / 1_000_000
-  }
-
-  return (read, passed, done = false) => {
-    const elapsedTime = hrtimeToMS(process.hrtime(startTime))
-    const elapsedUsage = process.cpuUsage(startUsage)
-    const elapsedRSSMemory = (process.memoryUsage().rss - startMemory) / 1_048_576 // MB
-
-    const elapsedUserMS = elapsedUsage.user / 1000
-    const elapsedSystMS = elapsedUsage.system / 1000;
-    const cpuPercent = (100 * (elapsedUserMS + elapsedSystMS) / elapsedTime).toFixed(1) + '%'
-
-    done
-      ? logUpdate(`
-          ⠿ read: ${read}
-            passed: ${passed}
-            diff: ${read - passed}
-            remaining: ${(read / fileSize * 100).toFixed(3)}%
-            cpu usage: ~${cpuPercent}
-            rss memory: ${elapsedRSSMemory.toFixed(3)} MB
-            elapsed time: ${elapsedTime.toFixed(3)} ms
-        `)
-      : logUpdate(`
-          ${spinner[i = ++i % spinner.length]} read: ${read}
-            passed: ${passed}
-            diff: ${read - passed}
-            remaining: ${(read / fileSize * 100).toFixed(3)}%
-            cpu usage: ~${cpuPercent}
-            rss memory: ${elapsedRSSMemory.toFixed(3)} MB
-            elapsed time: ${elapsedTime.toFixed(3)} ms
-        `)
-  }
-}

@@ -2,7 +2,10 @@ const fs = require('fs')
 const { createGzip } = require('zlib')
 const logUpdate = require('log-update')
 
-/* highWaterMark sets stream buffer size (memory usage) */
+/*
+  highWaterMark sets stream buffer size (memory usage)
+  streams are in paused mode by default
+*/
 const vidStream = fs.createReadStream('./resource/powder-day.mp4', { highWaterMark: 4 * 1024 })
 const writeStream = fs.createWriteStream(vidStream.path + '-copy.mp4.gz', { highWaterMark: 4 * 1024 })
 const readStreamSize = fs.statSync(vidStream.path).size
@@ -38,7 +41,7 @@ vidStream
     const status = gzip.write(chunk)
     progress(vidStream.bytesRead, gzip.bytesWritten, writeStream.bytesWritten)
 
-    /* pauses read stream if gzip stream buffer capacity is full */
+    /* pauses readable stream if gzip stream buffer capacity is full */
     if (!status) vidStream.pause()
   })
   .on('close', () => gzip.end())
@@ -49,12 +52,17 @@ gzip
     progress(vidStream.bytesRead, gzip.bytesWritten, writeStream.bytesWritten)
     if (!status) gzip.pause()
   })
-  /* resumes paused read stream once write stream is ready */
+  /*
+    signals writable can receive more data
+    resumes paused read stream once stream is ready
+  */
   .on('drain', () => {
     vidStream.resume()
     progress(vidStream.bytesRead, gzip.bytesWritten, writeStream.bytesWritten)
   })
   .on('close', () => writeStream.end())
+/* finish event is emitted after close event, when all data has been flushed to the system */
+// .on('finish', () => { })
 
 writeStream
   .on('drain', () => {
