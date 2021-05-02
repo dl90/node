@@ -33,25 +33,14 @@ function spin (startTime, startUsage, startMemory, fileSize) {
     const elapsedSystMS = elapsedUsage.system / 1000;
     const cpuPercent = (100 * (elapsedUserMS + elapsedSystMS) / elapsedTime).toFixed(1) + '%'
 
-    done
-      ? logUpdate(`
-          ⠿ bytes read: ${read}
-            bytes passed: ${passed}
-            diff: ${read - passed}
-            read: ${(read / fileSize * 100).toFixed(3)}%
-            cpu usage: ~${cpuPercent}
-            rss memory: ${elapsedRSSMemory.toFixed(3)} MB
-            elapsed time: ${elapsedTime.toFixed(3)} ms
-        `)
-      : logUpdate(`
-          ${spinner[i = ++i % spinner.length]} bytes read: ${read}
-            bytes passed: ${passed}
-            diff: ${read - passed}
-            read: ${(read / fileSize * 100).toFixed(3)}%
-            cpu usage: ~${cpuPercent}
-            rss memory: ${elapsedRSSMemory.toFixed(3)} MB
-            elapsed time: ${elapsedTime.toFixed(3)} ms
-        `)
+    logUpdate(`
+      ${done ? '⠿' : spinner[i = ++i % spinner.length]} bytes read: ${read}
+        bytes passed: ${passed}
+        diff: ${read - passed}
+        read: ${(read / fileSize * 100).toFixed(3)}%
+        cpu usage: ~${cpuPercent}
+        rss memory: ${elapsedRSSMemory.toFixed(3)} MB
+        elapsed time: ${elapsedTime.toFixed(3)} ms
+    `)
   }
 }
-

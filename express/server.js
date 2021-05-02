@@ -6,6 +6,7 @@ import env from 'dotenv'
 env.config()
 const PORT = process.env.PORT
 
-http.createServer(app(mysql_connection)).listen(PORT, () => {
-  console.log(`Listening on port: ${PORT}`)
-})
+http.createServer(app(mysql_connection))
+  .listen(PORT, () => {
+    console.log(`Listening on port: ${PORT}`)
+  })
