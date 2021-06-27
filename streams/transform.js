@@ -91,6 +91,7 @@ collect
         if (a.charCodeAt(i) === b.charCodeAt(i)) continue
         return a.charCodeAt[i] - b.charCodeAt[i]
       }
+      return 0
     }).join('\n')
     const output = fs.createWriteStream('./resource/pw.txt')
 

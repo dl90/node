@@ -12,15 +12,14 @@ module.exports = class ServiceRegistry {
   }
 
   async #getAllKeys () {
-    const init = await this.redis.scan('0')
-    let pointer = init[0]
-    const KEYS = new Set(init[1])
+    let pointer = '0'
+    const KEYS = new Set
 
-    while (pointer !== '0') {
+    do {
       const res = await this.redis.scan(pointer)
       pointer = res[0]
-      res[1].forEach(key => KEYS.add(key))
-    }
+      res[1].forEach(KEYS.add, KEYS)
+    } while (pointer !== '0')
 
     return [...KEYS]
   }

@@ -1,0 +1,28 @@
+syntax = "proto3";
+package todo;
+
+service Todo {
+  rpc createTodo(TodoItem) returns (TodoItem);
+  rpc getTodos(option) returns (TodoItems);
+  rpc encrypt(stream data) returns (stream data);
+}
+
+message TodoItem {
+  int32 id = 1;
+  string text = 2;
+}
+
+message option {
+  int32 start = 1;
+  int32 end = 2;
+}
+
+message TodoItems {
+  repeated TodoItem items = 1;
+  int32 size = 2;
+}
+
+message data {
+  int32 id = 1;
+  string payload = 2;
+}
