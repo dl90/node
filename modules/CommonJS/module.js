@@ -89,3 +89,6 @@ for (const childModule of module.children) {
 }
 
 console.log(exports === module.exports)
+console.log(module_1.count)
+module_1.add()
+console.log(module_1.count)

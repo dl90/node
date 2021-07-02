@@ -15,6 +15,11 @@ function print () {
   console.log(module)
 }
 
+let count = 1
+function add () { count++ }
+
 module.exports = {
-  print
+  print,
+  count,
+  add
 }
