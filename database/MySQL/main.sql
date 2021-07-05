@@ -1,2 +1,2 @@
-SOURCE express/database.sql
-SOURCE express/tables.sql
+SOURCE node/init.sql
+SOURCE node/tables.sql

@@ -1,5 +1,0 @@
-DROP DATABASE IF EXISTS express;
-
-CREATE DATABASE express;
-ALTER DATABASE express CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
-USE express;

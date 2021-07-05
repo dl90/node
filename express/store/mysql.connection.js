@@ -4,12 +4,12 @@ import env from 'dotenv'
 env.config()
 
 const config = {
-  connectionLimit: 10,
-  waitForConnections: true,
   host: process.env.MYSQL_HOST,
-  user: process.env.MYSQL_USERNAME,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PW,
+  database: process.env.MYSQL_DB,
+  waitForConnections: true,
+  connectionLimit: 10
 }
 
 export default mysql.createPool(config)

@@ -22,7 +22,7 @@ app.use(express.json({ strict: true, limit: '100kb' })) // verify: function to v
 app.use(express.urlencoded({ extended: false, limit: '100kb', parameterLimit: 100 })) // verify: function to validate x-www-form-urlencoded
 app.use(cookieSession({
   name: 'session',
-  secret: 'WcGZDidfCgtdzgNZRK3hcHwmKkeEmNG82oqd6q3osjfzCDHcZUweDex8Q7g2WNPuR3KenP',
+  secret: process.env.SESSION_COOKIE_SECRET,
   maxAge: 86_400_000, // 24 hours
   secure: false,
   httpOnly: true
@@ -32,9 +32,8 @@ app.use(csurf({ cookie: false }))
 
 export default function (databasePool) {
 
-  app.use('/api/posts', postRoute(databasePool))
-
   app.get('/test', (req, res) => res.send(req.body))
+  app.use('/api/posts', postRoute(databasePool))
 
   return app
 }

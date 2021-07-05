@@ -1,4 +1,4 @@
-const TABLE = 'posts'
+const TABLE = 'post'
 
 export function getAll (pool) {
   return new Promise((resolve, reject) => {

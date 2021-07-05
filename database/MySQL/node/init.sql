@@ -1,0 +1,19 @@
+DROP DATABASE IF EXISTS node;
+CREATE DATABASE node;
+ALTER DATABASE node CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+USE node;
+
+
+DROP ROLE IF EXISTS 'node_db';
+CREATE ROLE 'node_db';
+GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON node.* TO 'node_db';
+
+
+DROP USER IF EXISTS 'node'@'%';
+CREATE USER 'node'@'%' IDENTIFIED BY 'password';
+GRANT 'node_db' TO 'node'@'%';
+FLUSH PRIVILEGES;
+
+
+SET DEFAULT ROLE ALL TO
+  'node'@'%';
