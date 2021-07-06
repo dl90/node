@@ -10,7 +10,8 @@ const server = fastify({
 (async () => {
   try {
     server.register(app)
-    await server.listen(PORT)
+    const address = await server.listen(PORT)
+    console.log(`serving: ${address}`)
   } catch (error) {
     server.log.error(error)
     process.exit(1)

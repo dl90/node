@@ -1,4 +1,4 @@
-import { items } from '../../../mockDB.js'
+import { items, nextId } from '../../../mockDB.js'
 
 const itemSchema = {
   type: 'object',
@@ -10,6 +10,9 @@ const itemSchema = {
 
 export const getAll = {
   schema: {
+    description: 'get all items',
+    tags: ['item'],
+    summary: 'qwerty',
     response: {
       200: {
         type: 'array',
@@ -19,16 +22,23 @@ export const getAll = {
   },
   handler: getItems
 }
-function getItems (req, res) {
-  return res.send(items)
+function getItems (request, reply) {
+  return items
 }
 
 export const getOne = {
   schema: {
-    querystring: {
+    description: 'get one item',
+    tags: ['item'],
+    summary: 'qwerty',
+    params: {
       type: 'object',
+      required: ['id'],
       properties: {
-        id: { type: 'string' }
+        id: {
+          type: 'string',
+          description: 'item id'
+        }
       }
     },
     response: {
@@ -37,13 +47,16 @@ export const getOne = {
   },
   handler: getItem
 }
-function getItem (req, res) {
-  const { id } = req.params
-  return res.send(items.find(item => item.id === +id))
+function getItem (request, reply) {
+  const { id } = request.params
+  return items.find(item => item.id === +id)
 }
 
 export const postOne = {
   schema: {
+    description: 'add new item',
+    tags: ['item'],
+    summary: 'qwerty',
     body: {
       type: 'object',
       required: ['name'],
@@ -57,18 +70,21 @@ export const postOne = {
   },
   handler: createItem
 }
-function createItem (req, res) {
-  const { name } = req.body
+function createItem (request, reply) {
+  const { name } = request.body
   const item = {
-    id: items.length + 1,
+    id: nextId(),
     name
   }
   items.push(item)
-  return res.code(201).send(item)
+  return reply.code(201).send(item)
 }
 
 export const updateOne = {
   schema: {
+    description: 'update an item',
+    tags: ['item'],
+    summary: 'qwerty',
     body: {
       type: 'object',
       required: ['id', 'name'],
@@ -86,19 +102,22 @@ export const updateOne = {
   },
   handler: updateItem
 }
-function updateItem (req, res) {
-  const { id, name } = req.body
+function updateItem (request, reply) {
+  const { id, name } = request.body
 
   const exist = items.find(item => item.id === +id)
   if (!exist)
-    return res.code(404).send({ message: "Item not found" })
+    return reply.code(404).send({ message: "Item not found" })
 
   exist.name = name
-  return res.send(exist)
+  return exist
 }
 
 export const deleteOne = {
   schema: {
+    description: 'delete an item',
+    tags: ['item'],
+    summary: 'qwerty',
     body: {
       type: 'object',
       required: ['id'],
@@ -123,13 +142,13 @@ export const deleteOne = {
   },
   handler: deleteItem
 }
-function deleteItem (req, res) {
-  const { id } = req.body
+function deleteItem (request, reply) {
+  const { id } = request.body
 
   const exist = items.find(item => item.id === +id)
   if (!exist)
-    return res.code(404).send({ message: "Item not found" })
+    return reply.code(404).send({ message: "Item not found" })
 
   items.splice(items.indexOf(exist), 1)
-  return res.send({ message: `${id} deleted` })
+  return { message: `${id} deleted` }
 }

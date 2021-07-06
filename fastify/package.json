@@ -13,6 +13,7 @@
   "dependencies": {
     "fastify": "^3.18.1",
     "fastify-autoload": "^3.8.0",
+    "fastify-plugin": "^3.0.0",
     "fastify-swagger": "^4.8.2"
   }
 }
