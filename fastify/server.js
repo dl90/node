@@ -1,7 +1,8 @@
 import fastify from 'fastify'
 import { app } from './src/app.js'
 
-const PORT = 3000
+import { serverConfig } from './config/appConfig.js';
+
 const server = fastify({
   logger: true,
   ignoreTrailingSlash: true
@@ -10,7 +11,7 @@ const server = fastify({
 (async () => {
   try {
     server.register(app)
-    const address = await server.listen(PORT)
+    const address = await server.listen(serverConfig.port)
     console.log(`serving: ${address}`)
   } catch (error) {
     server.log.error(error)

@@ -1,4 +1,4 @@
-import { items, nextId } from '../../../mockDB.js'
+import { items, nextId } from './mockDB.js'
 
 const itemSchema = {
   type: 'object',
@@ -11,25 +11,32 @@ const itemSchema = {
 export const getAll = {
   schema: {
     description: 'get all items',
-    tags: ['item'],
+    tags: ['test'],
     summary: 'qwerty',
     response: {
       200: {
-        type: 'array',
-        items: itemSchema
+        type: 'object',
+        properties: {
+          time: { type: 'number' },
+          items: {
+            type: 'array',
+            items: itemSchema
+          }
+        }
+
       }
     }
   },
   handler: getItems
 }
 function getItems (request, reply) {
-  return items
+  return { time: reply.getResponseTime(), items }
 }
 
 export const getOne = {
   schema: {
     description: 'get one item',
-    tags: ['item'],
+    tags: ['test'],
     summary: 'qwerty',
     params: {
       type: 'object',
@@ -42,20 +49,26 @@ export const getOne = {
       }
     },
     response: {
-      200: itemSchema
+      200: {
+        type: 'object',
+        properties: {
+          time: { type: 'number' },
+          item: itemSchema
+        }
+      }
     }
   },
   handler: getItem
 }
 function getItem (request, reply) {
-  const { id } = request.params
-  return items.find(item => item.id === +id)
+  const item = items.find(item => item.id === +request.params.id)
+  return { time: reply.getResponseTime(), item }
 }
 
-export const postOne = {
+export const createOne = {
   schema: {
     description: 'add new item',
-    tags: ['item'],
+    tags: ['test'],
     summary: 'qwerty',
     body: {
       type: 'object',
@@ -65,7 +78,13 @@ export const postOne = {
       }
     },
     response: {
-      201: itemSchema
+      201: {
+        type: 'object',
+        properties: {
+          time: { type: 'number' },
+          item: itemSchema
+        }
+      }
     }
   },
   handler: createItem
@@ -77,13 +96,15 @@ function createItem (request, reply) {
     name
   }
   items.push(item)
-  return reply.code(201).send(item)
+  return reply
+    .code(201)
+    .send({ time: reply.getResponseTime(), item })
 }
 
 export const updateOne = {
   schema: {
     description: 'update an item',
-    tags: ['item'],
+    tags: ['test'],
     summary: 'qwerty',
     body: {
       type: 'object',
@@ -91,7 +112,13 @@ export const updateOne = {
       properties: itemSchema.properties
     },
     response: {
-      200: itemSchema,
+      200: {
+        type: 'object',
+        properties: {
+          time: { type: 'number' },
+          item: itemSchema
+        }
+      },
       404: {
         type: 'object',
         properties: {
@@ -110,13 +137,13 @@ function updateItem (request, reply) {
     return reply.code(404).send({ message: "Item not found" })
 
   exist.name = name
-  return exist
+  return { time: reply.getResponseTime(), item: exist }
 }
 
 export const deleteOne = {
   schema: {
     description: 'delete an item',
-    tags: ['item'],
+    tags: ['test'],
     summary: 'qwerty',
     body: {
       type: 'object',
@@ -129,6 +156,7 @@ export const deleteOne = {
       200: {
         type: 'object',
         properties: {
+          time: { type: 'number' },
           message: { type: 'string' }
         }
       },
@@ -150,5 +178,5 @@ function deleteItem (request, reply) {
     return reply.code(404).send({ message: "Item not found" })
 
   items.splice(items.indexOf(exist), 1)
-  return { message: `${id} deleted` }
+  return { time: reply.getResponseTime(), message: `${id} deleted` }
 }

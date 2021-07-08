@@ -1,0 +1,35 @@
+@host = http://localhost:3001
+@route = note
+
+### GET ALL
+GET {{host}}/api/{{route}} HTTP/1.1
+
+### GET ONE
+GET {{host}}/api/{{route}}/3 HTTP/1.1
+
+### CREATE
+POST {{host}}/api/{{route}} HTTP/1.1
+content-type: application/json
+
+{
+  "title": "sample",
+  "body": "testing"
+}
+
+#### UPDATE
+PUT {{host}}/api/{{route}} HTTP/1.1
+content-type: application/json
+
+{
+  "id": 3,
+  "title": "changed",
+  "body": "changing"
+}
+
+### DELETE
+DELETE {{host}}/api/{{route}} HTTP/1.1
+content-type: application/json
+
+{
+  "id": 3
+}

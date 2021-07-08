@@ -1,5 +1,8 @@
-###
-GET http://localhost:3000/api/test HTTP/1.1
+@host = http://localhost:3001
+@route = test
 
-###
-GET http://localhost:3000/api/test/ping HTTP/1.1
+### TEST
+GET {{host}}/api/{{route}} HTTP/1.1
+
+### PING
+GET {{host}}/api/{{route}}/ping HTTP/1.1
