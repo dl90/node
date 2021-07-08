@@ -5,7 +5,7 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --coverage --runInBand"
   },
   "keywords": [],
   "author": "",
@@ -16,7 +16,9 @@
     "fastify-autoload": "^3.8.0",
     "fastify-plugin": "^3.0.0",
     "fastify-postgres": "^3.5.0",
-    "fastify-swagger": "^4.8.2",
-    "pg": "^8.6.0"
+    "fastify-swagger": "^4.8.2"
+  },
+  "devDependencies": {
+    "jest": "^27.0.6"
   }
 }

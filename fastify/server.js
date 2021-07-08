@@ -1,6 +1,6 @@
 import fastify from 'fastify'
-import { app } from './src/app.js'
 
+import app from './src/app.js'
 import { serverConfig } from './config/appConfig.js';
 
 const server = fastify({

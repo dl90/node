@@ -111,8 +111,12 @@ export const updateOne = {
     tags: ['note'],
     body: {
       type: 'object',
-      required: ['id', 'title', 'body'],
-      properties: noteSchema.properties
+      properties: noteSchema.properties,
+      anyOf: [
+        { required: ['id', 'title', 'body'] },
+        { required: ['id', 'title'] },
+        { required: ['id', 'body'] }
+      ]
     },
     response: {
       200: perfSchema,

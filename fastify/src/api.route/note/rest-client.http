@@ -5,7 +5,7 @@
 GET {{host}}/api/{{route}} HTTP/1.1
 
 ### GET ONE
-GET {{host}}/api/{{route}}/3 HTTP/1.1
+GET {{host}}/api/{{route}}/4 HTTP/1.1
 
 ### CREATE
 POST {{host}}/api/{{route}} HTTP/1.1
