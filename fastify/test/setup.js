@@ -1,8 +1,8 @@
 import fastify from 'fastify'
 import fp from 'fastify-plugin'
 
-import app from '../src/app.js'
-import { pgConfig } from '../config/appConfig.js'
+import app from '../src/app.mjs'
+import { pgConfig } from '../config/appConfig.mjs'
 
 export default function setup () {
 
@@ -18,6 +18,7 @@ export default function setup () {
   })
 
   afterAll(async () => {
+    await server.pg[pgConfig.database].query('TRUNCATE "note" RESTART IDENTITY')
     await server.close()
   })
 

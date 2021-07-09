@@ -1,11 +1,13 @@
 
 const noteSchema = {
   type: 'object',
-  required: ['id', 'title', 'body'],
+  required: ['id', 'title', 'body', 'created_at'],
   properties: {
     id: { type: 'number', description: 'note id', nullable: false },
     title: { type: 'string', nullable: false },
-    body: { type: 'string', nullable: false }
+    body: { type: 'string', nullable: false },
+    created_at: { type: 'string', nullable: false },
+    updated_at: { type: 'string', nullable: true }
   }
 }
 
@@ -22,6 +24,14 @@ export const getAll = {
   schema: {
     description: 'get all notes',
     tags: ['note'],
+    queryString: {
+      type: 'object',
+      properties: {
+        search: { type: 'string' },
+        index: { type: 'number' },
+        limit: { type: 'number' }
+      }
+    },
     response: {
       200: {
         type: 'object',
@@ -38,7 +48,8 @@ export const getAll = {
   handler: getNotes
 }
 async function getNotes (request, reply) {
-  const { rows } = await this.noteDAL.getAll()
+  const { search, index, limit } = request.query
+  const { rows } = await this.noteDAL.getAll({ search, index, limit })
   return { time: reply.getResponseTime(), notes: rows }
 }
 

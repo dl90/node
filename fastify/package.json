@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-  "type": "module",
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/.bin/jest --coverage --runInBand"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --coverage --runInBand",
+    "migrate": "node node_modules/db-migrate/bin/db-migrate"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +19,8 @@
     "fastify-swagger": "^4.8.2"
   },
   "devDependencies": {
+    "db-migrate": "^0.11.12",
+    "db-migrate-pg": "^1.2.2",
     "jest": "^27.0.6"
   }
 }

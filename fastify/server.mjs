@@ -1,7 +1,7 @@
 import fastify from 'fastify'
 
-import app from './src/app.js'
-import { serverConfig } from './config/appConfig.js';
+import app from './src/app.mjs'
+import { serverConfig } from './config/appConfig.mjs';
 
 const server = fastify({
   logger: true,

@@ -4,7 +4,7 @@ import {
   createOne,
   updateOne,
   deleteOne
-} from './controller.js'
+} from './controller.mjs'
 
 export default async (fastify, opts) => {
 

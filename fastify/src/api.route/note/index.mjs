@@ -1,12 +1,12 @@
-import { pgConfig } from '../../../config/appConfig.js'
-import noteDAL from "./noteDAL.js"
+import { pgConfig } from '../../../config/appConfig.mjs'
+import noteDAL from "./noteDAL.mjs"
 import {
   getAll,
   getOne,
   createOne,
   updateOne,
   deleteOne
-} from './controller.js'
+} from './controller.mjs'
 
 export default async (fastify, opts) => {
   fastify.decorate('noteDAL', noteDAL(fastify.pg[pgConfig.database]))

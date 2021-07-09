@@ -1,4 +1,4 @@
-import { root, ping } from "./controller.js"
+import { root, ping } from "./controller.mjs"
 
 export default async (fastify, opts) => {
 

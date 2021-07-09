@@ -1,4 +1,4 @@
-import { items, nextId } from './mockDB.js'
+import { items, nextId } from './mockDB.mjs'
 
 const itemSchema = {
   type: 'object',
