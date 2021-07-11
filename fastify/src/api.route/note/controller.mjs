@@ -4,6 +4,7 @@ const noteSchema = {
   required: ['id', 'title', 'body', 'created_at'],
   properties: {
     id: { type: 'number', description: 'note id', nullable: false },
+    user_uid: { type: 'string', description: 'user uid', nullable: false },
     title: { type: 'string', nullable: false },
     body: { type: 'string', nullable: false },
     created_at: { type: 'string', nullable: false },
@@ -13,10 +14,17 @@ const noteSchema = {
 
 const perfSchema = {
   type: 'object',
-  required: ['time'],
   properties: {
     time: { type: 'number' },
     note: noteSchema
+  }
+}
+
+const messageSchema = {
+  type: 'object',
+  properties: {
+    time: { type: 'number' },
+    message: { type: 'string' }
   }
 }
 
@@ -24,10 +32,10 @@ export const getAll = {
   schema: {
     description: 'get all notes',
     tags: ['note'],
-    queryString: {
+    querystring: {
       type: 'object',
       properties: {
-        search: { type: 'string' },
+        search: { type: 'string', description: 'matches against body' },
         index: { type: 'number' },
         limit: { type: 'number' }
       }
@@ -45,13 +53,13 @@ export const getAll = {
       }
     }
   },
-  handler: getNotes
+  handler: async function (request, reply) {
+    const { search, index, limit } = request.query
+    const { rows } = await this.noteDAL.getAll({ search, index, limit })
+    return { time: reply.getResponseTime(), notes: rows }
+  }
 }
-async function getNotes (request, reply) {
-  const { search, index, limit } = request.query
-  const { rows } = await this.noteDAL.getAll({ search, index, limit })
-  return { time: reply.getResponseTime(), notes: rows }
-}
+
 
 export const getOne = {
   schema: {
@@ -70,25 +78,22 @@ export const getOne = {
     },
     response: {
       200: perfSchema,
-      404: {
-        type: 'object',
-        properties: {
-          message: { type: 'string' }
-        }
-      }
+      404: messageSchema
     }
   },
-  handler: getNote
-}
-async function getNote (request, reply) {
-  const { id } = request.params
-  const { rows } = await this.noteDAL.getOne(id)
+  handler: async function (request, reply) {
+    const { id } = request.params
+    const { rows } = await this.noteDAL.getOne(id)
 
-  if (!rows.length)
-    return reply.code(404).send({ message: "Item not found" })
+    if (!rows.length)
+      return reply
+        .code(404)
+        .send({ time: reply.getResponseTime(), message: "Item not found" })
 
-  return { time: reply.getResponseTime(), note: rows[0] }
+    return { time: reply.getResponseTime(), note: rows[0] }
+  }
 }
+
 
 export const createOne = {
   schema: {
@@ -103,18 +108,26 @@ export const createOne = {
       }
     },
     response: {
-      201: perfSchema
+      201: perfSchema,
+      400: messageSchema
     }
   },
-  handler: createNote
-}
-async function createNote (request, reply) {
-  const { title, body } = request.body
-  const { rows } = await this.noteDAL.createOne(title, body)
+  handler: async function (request, reply) {
+    try {
+      const { uid } = request.session.user
+      const { title, body } = request.body
+      const { rows } = await this.noteDAL.createOne(uid, title, body)
 
-  reply.code(201)
-  return { time: reply.getResponseTime(), note: rows[0] }
+      return reply.code(201).send({ time: reply.getResponseTime(), note: rows[0] })
+    } catch (error) {
+      request.log.warn(`error: ${error}`)
+      return reply
+        .code(400)
+        .send({ time: reply.getResponseTime(), message: 'not created' })
+    }
+  }
 }
+
 
 export const updateOne = {
   schema: {
@@ -131,25 +144,30 @@ export const updateOne = {
     },
     response: {
       200: perfSchema,
-      404: {
-        type: 'object',
-        properties: {
-          message: { type: 'string' }
-        }
-      }
+      404: messageSchema
     }
   },
-  handler: updateNote
-}
-async function updateNote (request, reply) {
-  const { id, title, body } = request.body
-  const { rows } = await this.noteDAL.updateOne(id, title, body)
+  handler: async function (request, reply) {
+    try {
+      const { uid } = request.session.user
+      const { id, title, body } = request.body
+      const { rows } = await this.noteDAL.updateOne(id, uid, title, body)
 
-  if (!rows.length)
-    return reply.code(404).send({ message: "Item not found" })
+      if (!rows.length)
+        return reply
+          .code(404)
+          .send({ time: reply.getResponseTime(), message: 'item not found' })
 
-  return { time: reply.getResponseTime(), note: rows[0] }
+      return { time: reply.getResponseTime(), note: rows[0] }
+    } catch (error) {
+      request.log.warn(`error: ${error}`)
+      return reply
+        .code(404)
+        .send({ time: reply.getResponseTime(), message: 'update failed' })
+    }
+  }
 }
+
 
 export const deleteOne = {
   schema: {
@@ -178,14 +196,21 @@ export const deleteOne = {
       }
     }
   },
-  handler: deleteNote
-}
-async function deleteNote (request, reply) {
-  const { id } = request.body
-  const { rowCount } = await this.noteDAL.deleteOne(id)
+  handler: async function (request, reply) {
+    try {
+      const { uid } = request.session.user
+      const { id } = request.body
+      const { rowCount } = await this.noteDAL.deleteOne(id, uid)
 
-  if (!rowCount)
-    return reply.code(404).send({ message: "Item not found" })
+      if (!rowCount)
+        return reply.code(404).send({ message: "Item not found" })
 
-  return { time: reply.getResponseTime(), message: `${id} deleted` }
+      return { time: reply.getResponseTime(), message: `${id} deleted` }
+    } catch (error) {
+      request.log.warn(`error: ${error}`)
+      return reply
+        .code(404)
+        .send({ time: reply.getResponseTime(), message: 'delete failed' })
+    }
+  }
 }

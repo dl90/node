@@ -1,17 +1,17 @@
 @host = http://localhost:3001
-@route = note
+@route = /api/note
 
 ### GET ALL
-GET {{host}}/api/{{route}}
-?search=test
+GET {{host}}{{route}}
+?search=changed
 &index=0
-&limit=3
+&limit=5
 
 ### GET ONE
-GET {{host}}/api/{{route}}/4 HTTP/1.1
+GET {{host}}{{route}}/4 HTTP/1.1
 
 ### CREATE
-POST {{host}}/api/{{route}} HTTP/1.1
+POST {{host}}{{route}} HTTP/1.1
 content-type: application/json
 
 {
@@ -20,17 +20,17 @@ content-type: application/json
 }
 
 #### UPDATE
-PUT {{host}}/api/{{route}} HTTP/1.1
+PUT {{host}}{{route}} HTTP/1.1
 content-type: application/json
 
 {
-  "id": 3,
+  "id": 1,
   "title": "changed",
   "body": "changing"
 }
 
 ### DELETE
-DELETE {{host}}/api/{{route}} HTTP/1.1
+DELETE {{host}}{{route}} HTTP/1.1
 content-type: application/json
 
 {

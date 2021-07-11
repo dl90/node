@@ -15,8 +15,9 @@ export default fp(async (fastify, opts) => {
       consumes: ['application/json'],
       produces: ['application/json'],
       tags: [
-        { name: 'test', description: 'Testing related end-points', },
-        { name: 'note', description: 'Testing related end-points' }
+        { name: 'test', description: 'Testing end-points', },
+        { name: 'note', description: 'Note end-points (requires login session)' },
+        { name: 'auth', description: 'Auth end-points' }
       ],
       uiConfig: {
         docExpansion: 'none',

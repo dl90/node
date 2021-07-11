@@ -4,23 +4,28 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/.bin/jest --coverage --runInBand",
+    "test": "tap",
     "migrate": "node node_modules/db-migrate/bin/db-migrate"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "argon2": "^0.28.2",
+    "connect-redis": "^6.0.0",
     "dotenv": "^10.0.0",
-    "fastify": "^3.18.1",
+    "fastify": "^3.19.0",
     "fastify-autoload": "^3.8.0",
+    "fastify-cookie": "^5.3.1",
     "fastify-plugin": "^3.0.0",
     "fastify-postgres": "^3.5.0",
-    "fastify-swagger": "^4.8.2"
+    "fastify-session": "^5.2.1",
+    "fastify-swagger": "^4.8.2",
+    "redis": "^3.1.2"
   },
   "devDependencies": {
     "db-migrate": "^0.11.12",
     "db-migrate-pg": "^1.2.2",
-    "jest": "^27.0.6"
+    "tap": "^15.0.9"
   }
 }

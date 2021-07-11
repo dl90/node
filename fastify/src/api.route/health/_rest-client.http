@@ -1,5 +1,5 @@
 @host = http://localhost:3001
-@route = test
+@route = health
 
 ### TEST
 GET {{host}}/api/{{route}} HTTP/1.1

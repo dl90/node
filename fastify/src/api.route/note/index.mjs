@@ -7,9 +7,13 @@ import {
   updateOne,
   deleteOne
 } from './controller.mjs'
+import checkSession from '../../middleware/checkSession.mjs'
 
 export default async (fastify, opts) => {
   fastify.decorate('noteDAL', noteDAL(fastify.pg[pgConfig.database]))
+
+  // requires login
+  fastify.addHook('preHandler', checkSession)
 
   fastify.get('/', getAll)
   fastify.get('/:id', getOne)

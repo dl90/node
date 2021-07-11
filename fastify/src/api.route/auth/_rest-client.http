@@ -1,0 +1,29 @@
+@host = http://localhost:3001
+@route = /api/auth
+
+### signup
+POST {{host}}{{route}}/signup HTTP/1.1
+content-type: application/json
+
+{
+  "email": "test@test.com",
+  "password": "Test!234"
+}
+
+### login
+
+POST {{host}}{{route}}/login HTTP/1.1
+content-type: application/json
+
+{
+  "email": "test@test.com",
+  "password": "Test!234"
+}
+
+### check
+
+GET {{host}}{{route}} HTTP/1.1
+
+### logout
+
+POST {{host}}{{route}} HTTP/1.1
