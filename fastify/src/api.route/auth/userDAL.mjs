@@ -3,7 +3,7 @@ export default (db) => {
 
   const createUser = (email, hash) => {
     return db.query(
-      'INSERT INTO "user" (email, hash) VALUES ($1, $2);',
+      'INSERT INTO "user" (email, hash) VALUES ($1, $2) RETURNING "uid"',
       [email.toLowerCase(), hash]
     )
   }
@@ -36,10 +36,10 @@ export default (db) => {
     )
   }
 
-  const deleteUser = (email) => {
+  const deleteUser = (uid) => {
     return db.query(
-      'DELETE FROM "user" WHERE "email" = $1',
-      [email]
+      'DELETE FROM "user" WHERE "uid" = $1',
+      [uid]
     )
   }
 

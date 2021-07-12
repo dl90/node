@@ -43,6 +43,9 @@ export const createUser = {
   },
   handler: async function (request, reply) {
     try {
+      if (request.session.user)
+        request.sessionStore.destroy(request.session.sessionId)
+
       const { email, password } = request.body
       const exist = await this.userDAL.findEmail(email)
       if (exist.rowCount === 1)
@@ -51,10 +54,13 @@ export const createUser = {
       const hash = await argon2.hash(password, argon2Config)
       const result = await this.userDAL.createUser(email, hash)
 
-      if (result.rowCount === 1)
+      if (result.rowCount === 1) {
+        const { uid } = result.rows[0]
+        request.session.user = { uid }
         return reply
           .code(201)
           .send({ time: reply.getResponseTime(), message: 'created' })
+      }
 
       return reply
         .code(400)
@@ -94,6 +100,11 @@ export const login = {
   },
   handler: async function (request, reply) {
     try {
+      if (request.session.user)
+        return reply
+          .code(200)
+          .send({ time: reply.getResponseTime(), user: { uid: request.session.user.uid } })
+
       const { email, password } = request.body
       const user = await this.userDAL.findUser(email)
       if (user.rowCount !== 1)
@@ -173,10 +184,47 @@ export const logout = {
     try {
       request.sessionStore.destroy(request.session.sessionId)
       request.session = null
+
       return reply
         .setCookie(sessionConfig.name, '', { expires: Date.now(), httpOnly: true })
         .send({ time: reply.getResponseTime(), message: 'ok' })
+
     } catch (error) {
+      request.log.warn(`error: ${error}`)
+      return reply
+        .code(403)
+        .setCookie(sessionConfig.name, '', { expires: Date.now(), httpOnly: true })
+        .send({ time: reply.getResponseTime(), message: 'something went wrong' })
+    }
+  }
+}
+
+export const deleteUser = {
+  schema: {
+    description: 'delete current user',
+    tags: ['auth'],
+    response: {
+      200: messageSchema,
+      403: messageSchema
+    },
+  },
+  preHandler: checkSession,
+  handler: async function (request, reply) {
+    try {
+      const { uid } = request.session.user
+      const result = await this.userDAL.deleteUser(uid)
+      if (result.rowCount !== 1)
+        throw new Error('failed to delete user')
+
+      request.sessionStore.destroy(request.session.sessionId)
+      request.session = null
+
+      return reply
+        .setCookie(sessionConfig.name, '', { expires: Date.now(), httpOnly: true })
+        .send({ time: reply.getResponseTime(), message: 'ok' })
+
+    } catch (error) {
+      request.log.warn(`error: ${error}`)
       return reply
         .code(403)
         .setCookie(sessionConfig.name, '', { expires: Date.now(), httpOnly: true })

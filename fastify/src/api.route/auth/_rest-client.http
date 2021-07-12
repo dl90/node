@@ -27,3 +27,7 @@ GET {{host}}{{route}} HTTP/1.1
 ### logout
 
 POST {{host}}{{route}} HTTP/1.1
+
+### delete
+
+DELETE {{host}}{{route}} HTTP/1.1

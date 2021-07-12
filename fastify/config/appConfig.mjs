@@ -32,7 +32,7 @@ export const serverConfig = {
 }
 
 export const sessionConfig = {
-  name: 'ssid',
+  name: 'sid',
   secret: process.env.SESSION_SECRET?.split(',') ||
     [crypto.randomBytes(32).toString('hex'), crypto.randomBytes(32).toString('hex')],
   cookie: {
